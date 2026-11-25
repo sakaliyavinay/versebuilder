@@ -116,7 +116,6 @@ export const AuthPage = ({ initialMode = "login" }) => {
                   <User size={16} />
                   <input
                     type="text"
-                    placeholder="e.g. Alex Rivera"
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -140,7 +139,6 @@ export const AuthPage = ({ initialMode = "login" }) => {
                   <AtSign size={16} />
                   <input
                     type="text"
-                    placeholder="alex-rivera"
                     value={username}
                     onChange={(e) =>
                       setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
@@ -157,7 +155,6 @@ export const AuthPage = ({ initialMode = "login" }) => {
                 <Mail size={16} />
                 <input
                   type="email"
-                  placeholder="yourname@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="editor-input"

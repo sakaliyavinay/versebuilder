@@ -134,7 +134,6 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
                 <label>Your Name *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Sarah Jenkins"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="editor-input"
@@ -146,7 +145,6 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
                 <label>Your Email *</label>
                 <input
                   type="email"
-                  placeholder="e.g. sarah@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="editor-input"
@@ -160,7 +158,6 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
                 <label>Your Phone / WhatsApp (Optional)</label>
                 <input
                   type="tel"
-                  placeholder="+1 555-0199"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="editor-input"
@@ -171,7 +168,6 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
                 <label>Estimated Budget / Scope</label>
                 <input
                   type="text"
-                  placeholder="e.g. $500 - $1,500 / 3 YouTube Edits"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
                   className="editor-input"
@@ -183,7 +179,6 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
               <label>Project Details / Message *</label>
               <textarea
                 rows={4}
-                placeholder="Describe your video idea, style reference, or goals..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className="editor-textarea"
