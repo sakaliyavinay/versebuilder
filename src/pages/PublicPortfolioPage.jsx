@@ -5,6 +5,7 @@ import { isSupabaseConfigured, getSupabasePortfolioBySlug } from "../lib/supabas
 import { useAuth } from "../context/AuthContext";
 import { useAppRouter } from "../router/Router";
 import { PublishedPill } from "../components/navigation/PublishedPill";
+import { PublicPortfolioFooter } from "../components/common/GlobalFooter";
 import { Lock, Sparkles, ArrowLeft, Edit3, Globe, Copy, Check } from "lucide-react";
 
 export const PublicPortfolioPage = () => {
@@ -158,6 +159,9 @@ export const PublicPortfolioPage = () => {
 
       {/* Subtle bottom badge for platform discovery */}
       <PublishedPill portfolio={portfolio} />
+
+      {/* Subtle creator-focused legal & report footer */}
+      <PublicPortfolioFooter />
     </div>
   );
 };

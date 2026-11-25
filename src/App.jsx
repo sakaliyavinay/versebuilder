@@ -7,11 +7,17 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { BuilderPage } from "./pages/BuilderPage";
 import { PublicPortfolioPage } from "./pages/PublicPortfolioPage";
 import { AuthPage } from "./pages/AuthPage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage";
+import { CookiePolicyPage } from "./pages/CookiePolicyPage";
+import { AcceptableUsePage } from "./pages/AcceptableUsePage";
+import { CookieConsentBanner } from "./components/common/CookieConsentBanner";
 
 import "./styles/templates.css";
 import "./styles/builder.css";
 import "./styles/landing.css";
 import "./styles/dashboard.css";
+import "./styles/legal.css";
 
 function AppContent() {
   const { currentRoute } = useAppRouter();
@@ -32,6 +38,20 @@ function AppContent() {
     case "auth":
       return <AuthPage initialMode={currentRoute.mode || "login"} />;
 
+    case "legal":
+      switch (currentRoute.page) {
+        case "privacy":
+          return <PrivacyPolicyPage />;
+        case "terms":
+          return <TermsOfServicePage />;
+        case "cookies":
+          return <CookiePolicyPage />;
+        case "acceptable-use":
+          return <AcceptableUsePage />;
+        default:
+          return <LandingPage />;
+      }
+
     default:
       return <LandingPage />;
   }
@@ -43,6 +63,7 @@ function App() {
       <PortfolioProvider>
         <AppRouterProvider>
           <AppContent />
+          <CookieConsentBanner />
           <Analytics />
         </AppRouterProvider>
       </PortfolioProvider>

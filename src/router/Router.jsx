@@ -12,7 +12,16 @@ export const parseLocation = () => {
     cleanRoute = hash.substring(1);
   } else if (hash.startsWith("#u/") || hash.startsWith("#p/")) {
     cleanRoute = "/" + hash.substring(1);
-  } else if (hash.startsWith("#builder") || hash.startsWith("#dashboard") || hash.startsWith("#login") || hash.startsWith("#signup")) {
+  } else if (
+    hash.startsWith("#builder") ||
+    hash.startsWith("#dashboard") ||
+    hash.startsWith("#login") ||
+    hash.startsWith("#signup") ||
+    hash.startsWith("#privacy") ||
+    hash.startsWith("#terms") ||
+    hash.startsWith("#cookies") ||
+    hash.startsWith("#acceptable-use")
+  ) {
     cleanRoute = "/" + hash.substring(1);
   }
 
@@ -54,7 +63,22 @@ export const parseLocation = () => {
     };
   }
 
-  // 5. Default to landing page
+  // 5. Legal pages
+  const legalRoutes = {
+    privacy: "privacy",
+    terms: "terms",
+    cookies: "cookies",
+    "acceptable-use": "acceptable-use",
+  };
+  if (legalRoutes[segments[0]]) {
+    return {
+      name: "legal",
+      page: legalRoutes[segments[0]],
+      path: cleanRoute,
+    };
+  }
+
+  // 6. Default to landing page
   return {
     name: "landing",
     path: "/",

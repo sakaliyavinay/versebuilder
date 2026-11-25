@@ -3,6 +3,7 @@ import { Sparkles, Mail, Lock, User, AtSign, ArrowRight, CheckCircle2, AlertCirc
 import { useAuth } from "../context/AuthContext";
 import { useAppRouter } from "../router/Router";
 import { PlatformNav } from "../components/navigation/PlatformNav";
+import { GlobalFooter } from "../components/common/GlobalFooter";
 
 export const AuthPage = ({ initialMode = "login" }) => {
   const { login, signup } = useAuth();
@@ -183,9 +184,25 @@ export const AuthPage = ({ initialMode = "login" }) => {
               <span>{loading ? "Processing..." : mode === "signup" ? "Create Free Account" : "Sign In"}</span>
               <ArrowRight size={16} />
             </button>
+
+            {mode === "signup" && (
+              <p className="auth-legal-notice">
+                By creating an account, you agree to our{" "}
+                <button type="button" onClick={() => navigate("/terms")}>
+                  Terms of Service
+                </button>{" "}
+                and{" "}
+                <button type="button" onClick={() => navigate("/privacy")}>
+                  Privacy Policy
+                </button>
+                .
+              </p>
+            )}
           </form>
         </div>
       </main>
+
+      <GlobalFooter />
     </div>
   );
 };

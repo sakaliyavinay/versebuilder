@@ -20,6 +20,7 @@ import { usePortfolio } from "../context/PortfolioContext";
 import { useAppRouter } from "../router/Router";
 import { TEMPLATES, getTemplateById } from "../templates/TemplateRegistry";
 import { PlatformNav } from "../components/navigation/PlatformNav";
+import { GlobalFooter } from "../components/common/GlobalFooter";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
@@ -232,6 +233,8 @@ export const DashboardPage = () => {
           </div>
         </div>
       </main>
+
+      <GlobalFooter />
 
       {/* Create New Portfolio Modal */}
       {isCreateModalOpen && (

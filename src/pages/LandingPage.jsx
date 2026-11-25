@@ -19,6 +19,7 @@ import { TEMPLATES } from "../templates/TemplateRegistry";
 import { useAppRouter } from "../router/Router";
 import { useAuth } from "../context/AuthContext";
 import { PlatformNav } from "../components/navigation/PlatformNav";
+import { GlobalFooter } from "../components/common/GlobalFooter";
 
 export const LandingPage = () => {
   const { navigate } = useAppRouter();
@@ -214,20 +215,8 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="landing-container">
-          <div className="footer-row">
-            <div className="footer-brand">
-              <strong>VerseBuilder</strong> — Multi-User Portfolio Publishing Platform
-            </div>
-            <div className="footer-links">
-              <button onClick={() => navigate("/signup")}>Create Account</button>
-              <button onClick={() => navigate("/login")}>Sign In</button>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Global Compliance Footer */}
+      <GlobalFooter />
     </div>
   );
 };
