@@ -7,9 +7,11 @@ import {
   LogOut,
   ChevronDown,
   Layers,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useAppRouter } from "../../router/Router";
+import { openAccountSettings } from "../common/accountSettingsEvents";
 
 export const PlatformNav = () => {
   const { user, logout } = useAuth();
@@ -80,6 +82,17 @@ export const PlatformNav = () => {
                   >
                     <Layers size={15} />
                     <span>My Portfolios</span>
+                  </button>
+
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      openAccountSettings();
+                    }}
+                  >
+                    <Settings size={15} />
+                    <span>Profile &amp; Account Settings</span>
                   </button>
 
                   <div className="dropdown-divider" />

@@ -22,7 +22,7 @@ export const compressImage = async (
   file,
   options = { maxWidth: 1920, maxHeight: 1920, quality: 0.82, onProgress: null }
 ) => {
-  const { maxWidth = 1920, maxHeight = 1920, quality = 0.82, onProgress } = options;
+  const { maxWidth = 1920, maxHeight = 1920, quality = 0.82, onProgress, cropToSquare = false } = options;
 
   if (onProgress) onProgress(15, "Reading image file...");
 
@@ -37,6 +37,19 @@ export const compressImage = async (
         let { width, height } = img;
         const originalWidth = width;
         const originalHeight = height;
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = width;
+        let sourceHeight = height;
+
+        if (cropToSquare) {
+          sourceWidth = Math.min(width, height);
+          sourceHeight = sourceWidth;
+          sourceX = Math.round((width - sourceWidth) / 2);
+          sourceY = Math.round((height - sourceHeight) / 2);
+          width = sourceWidth;
+          height = sourceHeight;
+        }
 
         // Maintain aspect ratio while capping to max boundaries
         if (width > maxWidth || height > maxHeight) {
@@ -57,7 +70,7 @@ export const compressImage = async (
         // High quality smoothing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
 
         if (onProgress) onProgress(75, "Applying compression algorithm...");
 

@@ -91,6 +91,17 @@ class StorageService {
           whatsapp: p.analytics?.clicks?.whatsapp || 0,
         },
       },
+      themeSettings: {
+        accentColor: p.themeSettings?.accentColor || "",
+        surfaceMode: p.themeSettings?.surfaceMode || "auto",
+        cardStyle: p.themeSettings?.cardStyle || "rounded",
+        fontPairing: p.themeSettings?.fontPairing || "modern-sans",
+        density: p.themeSettings?.density || "balanced",
+        ctaText: p.themeSettings?.ctaText || "",
+        ctaUrl: p.themeSettings?.ctaUrl || "",
+        buttonStyle: p.themeSettings?.buttonStyle || "solid",
+        ...p.themeSettings,
+      },
       sectionSettings: {
         showHero: p.sectionSettings?.showHero !== false,
         showWork: p.sectionSettings?.showWork !== false,
@@ -98,6 +109,10 @@ class StorageService {
         showTimeline: p.sectionSettings?.showTimeline !== false,
         showContact: p.sectionSettings?.showContact !== false,
         showDiscord: p.sectionSettings?.showDiscord !== false,
+        sectionOrder: Array.isArray(p.sectionSettings?.sectionOrder)
+          ? p.sectionSettings.sectionOrder
+          : ["hero", "work", "skills", "timeline", "contact", "discord"],
+        ...p.sectionSettings,
       },
     };
   }
@@ -133,6 +148,62 @@ class StorageService {
   getUserByUsername(username) {
     const users = this.getUsers();
     return users.find((u) => u.username.toLowerCase() === username.toLowerCase().trim()) || null;
+  }
+
+  isUsernameAvailable(username, currentUserId = null) {
+    if (!username) return false;
+    const cleanUsername = username.toLowerCase().trim();
+    const existing = this.getUserByUsername(cleanUsername);
+    if (!existing) return true;
+    return existing.id === currentUserId;
+  }
+
+  updateUserProfile(userId, updates = {}) {
+    const users = this.getUsers();
+    const index = users.findIndex((u) => u.id === userId);
+    if (index === -1) {
+      throw new Error("User not found.");
+    }
+
+    if (updates.username) {
+      const cleanUsername = updates.username.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "");
+      const existingUser = this.getUserByUsername(cleanUsername);
+      if (existingUser && existingUser.id !== userId) {
+        throw new Error("Username is already taken by another creator.");
+      }
+      updates.username = cleanUsername;
+    }
+
+    const updatedUser = {
+      ...users[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    users[index] = updatedUser;
+    this.saveUsers(users);
+
+    // If current session is this user, update session as well
+    const session = this.getCurrentSession();
+    if (session && session.id === userId) {
+      this.setCurrentSession(updatedUser);
+    }
+
+    return updatedUser;
+  }
+
+  updateUserPassword(userId, newPassword) {
+    const users = this.getUsers();
+    const index = users.findIndex((u) => u.id === userId);
+    if (index === -1) {
+      throw new Error("User not found.");
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error("Password must be at least 6 characters long.");
+    }
+    users[index].password = newPassword;
+    this.saveUsers(users);
+    return true;
   }
 
   createUser({ name, email, password, username, phone }) {

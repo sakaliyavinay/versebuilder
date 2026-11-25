@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const ClassicStructured = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -20,6 +21,7 @@ export const ClassicStructured = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -52,8 +54,8 @@ export const ClassicStructured = ({ portfolio, isPreview = false }) => {
             <a href="#classic-experience">Experience</a>
             <a href="#classic-contact">Contact</a>
           </nav>
-          <button className="classic-nav-cta" onClick={() => setIsInquiryOpen(true)}>
-            Get in Touch
+          <button className="classic-nav-cta" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
+            {themeSettings.ctaText || "Get in Touch"}
           </button>
         </div>
       </header>
@@ -78,9 +80,9 @@ export const ClassicStructured = ({ portfolio, isPreview = false }) => {
                 </a>
                 <button
                   className="classic-btn classic-btn-secondary"
-                  onClick={() => setIsInquiryOpen(true)}
+                  onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
                 >
-                  <Send size={16} /> Send Inquiry
+                  <Send size={16} /> {themeSettings.ctaText || "Send Inquiry"}
                 </button>
               </div>
 
@@ -261,7 +263,7 @@ export const ClassicStructured = ({ portfolio, isPreview = false }) => {
             <div className="classic-contact-btns">
               <button
                 className="classic-btn classic-btn-primary classic-btn-lg"
-                onClick={() => setIsInquiryOpen(true)}
+                onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
               >
                 <Send size={18} /> {contact.buttonText || "Send Direct Project Inquiry"}
               </button>

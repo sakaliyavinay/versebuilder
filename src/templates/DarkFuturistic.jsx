@@ -6,6 +6,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -23,6 +24,8 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
+    sectionSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -63,13 +66,14 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
           <a href="#df-skills">Skills</a>
           <a href="#df-contact">Contact</a>
         </div>
-        <button className="df-hire-btn" onClick={() => setIsInquiryOpen(true)}>
+        <button className="df-hire-btn" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
           Hire Me
         </button>
       </nav>
 
       {/* Hero Section */}
-      <section id="df-home" className="df-hero-section">
+      {sectionSettings.showHero !== false && (
+        <section id="df-home" className="df-hero-section">
         <div className="df-hero-grid">
           <div className="df-hero-content">
             {profile.statusBadge && (
@@ -83,9 +87,9 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
             <p className="df-bio-lead">{profile.bio}</p>
 
             <div className="df-hero-actions">
-              <button className="df-btn df-btn-primary" onClick={() => setIsInquiryOpen(true)}>
+              <button className="df-btn df-btn-primary" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
                 <Sparkles size={16} />
-                <span>Get In Touch / Hire</span>
+                <span>{themeSettings.ctaText || "Get In Touch / Hire"}</span>
               </button>
               <a href="#df-portfolio" className="df-btn df-btn-ghost">
                 <span>Explore Work</span>
@@ -94,7 +98,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
             </div>
 
             {/* Discord presence banner if enabled */}
-            {discord.enabled !== false && (discord.username || discord.userId) && (
+            {sectionSettings.showDiscord !== false && discord.enabled !== false && (discord.username || discord.userId) && (
               <div className="df-discord-slot">
                 <DiscordPresenceBadge discord={discord} onOpenInquiry={() => setIsInquiryOpen(true)} />
               </div>
@@ -141,9 +145,10 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Featured Video Showcase & Media Reel */}
-      {media.length > 0 && (
+      {sectionSettings.showWork !== false && media.length > 0 && (
         <section id="df-portfolio" className="df-portfolio-section">
         <div className="df-section-header">
           <div>
@@ -255,7 +260,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
       )}
 
       {/* Skills & Timeline Section */}
-      {(skills.length > 0 || timeline.length > 0) && (
+      {((sectionSettings.showSkills !== false && skills.length > 0) || (sectionSettings.showTimeline !== false && timeline.length > 0)) && (
         <section id="df-skills" className="df-skills-section">
           <div className="df-section-header">
             <p className="df-eyebrow">Expertise & Experience</p>
@@ -263,7 +268,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
           </div>
 
           <div className="df-two-col-layout">
-            {skills.length > 0 && (
+            {sectionSettings.showSkills !== false && skills.length > 0 && (
               <div className="df-panel-box">
                 <h3 className="df-panel-title">Core Competencies</h3>
                 <div className="df-skills-list">
@@ -285,7 +290,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
               </div>
             )}
 
-            {timeline.length > 0 && (
+            {sectionSettings.showTimeline !== false && timeline.length > 0 && (
               <div className="df-panel-box">
                 <h3 className="df-panel-title">Journey & Highlights</h3>
                 <div className="df-timeline-flow">
@@ -305,7 +310,8 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
       )}
 
       {/* Contact Section - DYNAMIC PER USER */}
-      <section id="df-contact" className="df-contact-section">
+      {sectionSettings.showContact !== false && (
+        <section id="df-contact" className="df-contact-section">
         <div className="df-contact-card">
           <p className="df-eyebrow">{contact.eyebrow || "READY FOR YOUR NEXT PROJECT?"}</p>
           <h2>{contact.heading || "Let's build something unforgettable together."}</h2>
@@ -337,15 +343,15 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
               </a>
             )}
 
-            <button className="df-btn df-btn-ghost" onClick={() => setIsInquiryOpen(true)}>
+            <button className="df-btn df-btn-ghost" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
               <Send size={16} />
-              <span>{contact.buttonText || "Send Project Brief"}</span>
+              <span>{themeSettings.ctaText || contact.buttonText || "Send Project Brief"}</span>
             </button>
           </div>
 
           {/* Socials & Discord */}
           <div className="df-social-links">
-            {discord.enabled !== false && discord.username && (
+            {sectionSettings.showDiscord !== false && discord.enabled !== false && discord.username && (
               <span>Discord: {discord.username}</span>
             )}
             {socials.twitter && (
@@ -371,6 +377,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Modals */}
       {isInquiryOpen && (

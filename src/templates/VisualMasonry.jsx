@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const VisualMasonry = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -20,6 +21,8 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
+    sectionSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -43,42 +46,46 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
         {/* Sticky Left Sidebar Profile */}
         <aside className="masonry-sidebar">
           <div className="masonry-sidebar-inner">
-            <div className="masonry-avatar-box">
-              {profile.avatarUrl ? (
-                <img src={profile.avatarUrl} alt={profile.displayName} className="masonry-avatar-img" />
-              ) : (
-                <div className="masonry-avatar-blank">{profile.displayName?.charAt(0)}</div>
-              )}
-            </div>
+            {sectionSettings.showHero !== false && (
+              <>
+                <div className="masonry-avatar-box">
+                  {profile.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt={profile.displayName} className="masonry-avatar-img" />
+                  ) : (
+                    <div className="masonry-avatar-blank">{profile.displayName?.charAt(0)}</div>
+                  )}
+                </div>
 
-            <div className="masonry-author-meta">
-              <h1 className="masonry-name">{profile.displayName}</h1>
-              <p className="masonry-role">{profile.tagline || profile.headline}</p>
-              {profile.location && (
-                <span className="masonry-loc">
-                  <MapPin size={13} /> {profile.location}
-                </span>
-              )}
-            </div>
+                <div className="masonry-author-meta">
+                  <h1 className="masonry-name">{profile.displayName}</h1>
+                  <p className="masonry-role">{profile.tagline || profile.headline}</p>
+                  {profile.location && (
+                    <span className="masonry-loc">
+                      <MapPin size={13} /> {profile.location}
+                    </span>
+                  )}
+                </div>
 
-            {profile.statusBadge && (
-              <div className="masonry-status-badge">
-                <span className="masonry-dot" />
-                <span>{profile.statusBadge}</span>
-              </div>
+                {profile.statusBadge && (
+                  <div className="masonry-status-badge">
+                    <span className="masonry-dot" />
+                    <span>{profile.statusBadge}</span>
+                  </div>
+                )}
+
+                <p className="masonry-bio">{profile.bio}</p>
+              </>
             )}
 
-            <p className="masonry-bio">{profile.bio}</p>
-
             {/* Discord Presence */}
-            {discord.enabled !== false && (discord.username || discord.userId) && (
+            {sectionSettings.showDiscord !== false && discord.enabled !== false && (discord.username || discord.userId) && (
               <div className="masonry-discord-slot">
                 <DiscordPresenceBadge discord={discord} onOpenInquiry={() => setIsInquiryOpen(true)} />
               </div>
             )}
 
             {/* Quick Metrics */}
-            {stats.length > 0 && (
+            {stats.length > 0 && sectionSettings.showHero !== false && (
               <div className="masonry-stats-row">
                 {stats.slice(0, 3).map((s, idx) => (
                   <div className="masonry-stat-unit" key={idx}>
@@ -90,7 +97,7 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
             )}
 
             {/* Skills Tags */}
-            {skills.length > 0 && (
+            {skills.length > 0 && sectionSettings.showSkills !== false && (
               <div className="masonry-skills-wrap">
                 <span className="masonry-section-label">Disciplines & Tools</span>
                 <div className="masonry-skill-pills">
@@ -104,40 +111,43 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
             )}
 
             {/* Contact Action */}
-            <div className="masonry-contact-box">
-              <button
-                type="button"
-                className="masonry-email-btn"
-                onClick={() => setIsInquiryOpen(true)}
-              >
-                <Send size={15} /> {contact.buttonText || "Send Project Inquiry"}
-              </button>
+            {sectionSettings.showContact !== false && (
+              <div className="masonry-contact-box">
+                <button
+                  type="button"
+                  className="masonry-email-btn"
+                  onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
+                >
+                  <Send size={15} /> {themeSettings.ctaText || contact.buttonText || "Send Project Inquiry"}
+                </button>
 
-              <div className="masonry-quick-contacts">
-                {contact.showEmail !== false && contact.email && (
-                  <a href={`mailto:${contact.email}`} className="masonry-sub-btn">
-                    <Mail size={14} /> Email
-                  </a>
-                )}
-                {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noreferrer" className="masonry-sub-btn">
-                    <Phone size={14} /> WhatsApp
-                  </a>
-                )}
-              </div>
+                <div className="masonry-quick-contacts">
+                  {contact.showEmail !== false && contact.email && (
+                    <a href={`mailto:${contact.email}`} className="masonry-sub-btn">
+                      <Mail size={14} /> Email
+                    </a>
+                  )}
+                  {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
+                    <a href={whatsappUrl} target="_blank" rel="noreferrer" className="masonry-sub-btn">
+                      <Phone size={14} /> WhatsApp
+                    </a>
+                  )}
+                </div>
 
-              <div className="masonry-social-links">
-                {socials.twitter && <a href={socials.twitter} target="_blank" rel="noreferrer">X</a>}
-                {socials.youtube && <a href={socials.youtube} target="_blank" rel="noreferrer">YT</a>}
-                {socials.github && <a href={socials.github} target="_blank" rel="noreferrer">GH</a>}
-                {socials.website && <a href={socials.website} target="_blank" rel="noreferrer">WEB</a>}
+                <div className="masonry-social-links">
+                  {socials.twitter && <a href={socials.twitter} target="_blank" rel="noreferrer">X</a>}
+                  {socials.youtube && <a href={socials.youtube} target="_blank" rel="noreferrer">YT</a>}
+                  {socials.github && <a href={socials.github} target="_blank" rel="noreferrer">GH</a>}
+                  {socials.website && <a href={socials.website} target="_blank" rel="noreferrer">WEB</a>}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </aside>
 
         {/* Right Gallery Stage */}
-        <main className="masonry-main-stage">
+        {sectionSettings.showWork !== false && (
+          <main className="masonry-main-stage">
           {/* Top Filter Bar */}
           <div className="masonry-filter-header">
             <div className="masonry-filter-tabs">
@@ -211,6 +221,7 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
             })}
           </div>
         </main>
+        )}
       </div>
 
       {/* Modals */}

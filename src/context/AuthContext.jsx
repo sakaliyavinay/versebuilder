@@ -6,6 +6,8 @@ import {
   signInWithSupabase,
   refreshSupabaseSession,
   signOutFromSupabase,
+  updateSupabaseProfile,
+  updateSupabasePassword,
 } from "../lib/supabaseService";
 
 const AuthContext = createContext(null);
@@ -123,6 +125,45 @@ export const AuthProvider = ({ children }) => {
     storageService.clearCurrentSession();
   };
 
+  const updateProfile = async ({ name, username, avatar, bio }) => {
+    if (!user) throw new Error("Must be logged in to update profile.");
+
+    if (isSupabaseConfigured) {
+      const updatedUser = await updateSupabaseProfile(accessToken, { name, username, avatar, bio });
+      if (updatedUser) {
+        setUser(updatedUser);
+        try {
+          const raw = localStorage.getItem(SUPABASE_SESSION_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            localStorage.setItem(
+              SUPABASE_SESSION_KEY,
+              JSON.stringify({ ...parsed, user: updatedUser })
+            );
+          }
+        } catch (err) {
+          console.warn("Could not refresh the saved account profile cache:", err);
+        }
+      }
+      return updatedUser;
+    }
+
+    const updatedUser = storageService.updateUserProfile(user.id, { name, username, avatar, bio });
+    setUser(updatedUser);
+    setAllUsers(storageService.getUsers());
+    return updatedUser;
+  };
+
+  const updatePassword = async (newPassword) => {
+    if (!user) throw new Error("Must be logged in to update password.");
+
+    if (isSupabaseConfigured) {
+      return await updateSupabasePassword(accessToken, newPassword);
+    }
+
+    return storageService.updateUserPassword(user.id, newPassword);
+  };
+
   const switchUser = (userId) => {
     if (isSupabaseConfigured) return;
     const targetUser = storageService.getUserById(userId);
@@ -148,6 +189,8 @@ export const AuthProvider = ({ children }) => {
         signup,
         login,
         logout,
+        updateProfile,
+        updatePassword,
         switchUser,
         refreshUsers,
       }}

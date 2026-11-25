@@ -12,12 +12,14 @@ import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { CookiePolicyPage } from "./pages/CookiePolicyPage";
 import { AcceptableUsePage } from "./pages/AcceptableUsePage";
 import { CookieConsentBanner } from "./components/common/CookieConsentBanner";
+import { AccountSettingsModal } from "./components/common/AccountSettingsModal";
 
 import "./styles/templates.css";
 import "./styles/builder.css";
 import "./styles/landing.css";
 import "./styles/dashboard.css";
 import "./styles/legal.css";
+import "./styles/customizer.css";
 
 function AppContent() {
   const { currentRoute } = useAppRouter();
@@ -63,6 +65,7 @@ function App() {
       <PortfolioProvider>
         <AppRouterProvider>
           <AppContent />
+          <AccountSettingsModal />
           <CookieConsentBanner />
           <Analytics />
         </AppRouterProvider>

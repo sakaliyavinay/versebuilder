@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   X,
   Globe,
@@ -16,48 +16,55 @@ export const PublishModal = ({ isOpen, onClose }) => {
   const { activePortfolio, updateActivePortfolio, setPublishStatus, validateSlug, saveDraft } =
     usePortfolio();
 
-  const [slugInput, setSlugInput] = useState("");
+  const [slugInput, setSlugInput] = useState(activePortfolio?.slug || "");
   const [slugError, setSlugError] = useState("");
   const [copied, setCopied] = useState(false);
   const [isSuccessMessage, setIsSuccessMessage] = useState(false);
-
-  useEffect(() => {
-    if (activePortfolio) {
-      setSlugInput(activePortfolio.slug || "");
-      setSlugError("");
-    }
-  }, [activePortfolio]);
+  const slugCheckRequest = useRef(0);
 
   if (!isOpen || !activePortfolio) return null;
 
   const publicUrl = `${window.location.origin}/u/${activePortfolio.slug}`;
 
   const handleSlugChange = async (val) => {
+    const requestId = ++slugCheckRequest.current;
     const clean = val
       .toLowerCase()
       .replace(/[^a-z0-9_-]/g, "-")
       .replace(/-+/g, "-");
     setSlugInput(clean);
 
-    if (clean.length < 2) {
-      setSlugError("Slug must be at least 2 characters long.");
+    if (clean.length < 2 || clean.length > 40) {
+      setSlugError("Handle must be between 2 and 40 characters.");
       return;
     }
 
-    const isAvail = await validateSlug(clean, activePortfolio.id);
-    if (!isAvail) {
-      setSlugError("This handle is already taken. Please pick another.");
-    } else {
-      setSlugError("");
+    try {
+      const isAvail = await validateSlug(clean, activePortfolio.id);
+      if (requestId !== slugCheckRequest.current) return;
+      setSlugError(isAvail ? "" : "This handle is already taken. Please pick another.");
+    } catch {
+      if (requestId === slugCheckRequest.current) {
+        setSlugError("Could not verify this handle. Check your connection and try again.");
+      }
     }
   };
 
   const handleSaveSlug = async () => {
     if (slugError || !slugInput) return;
-    updateActivePortfolio({ slug: slugInput });
-    await saveDraft({ ...activePortfolio, slug: slugInput });
-    setIsSuccessMessage(true);
-    setTimeout(() => setIsSuccessMessage(false), 2500);
+    try {
+      const isAvailable = await validateSlug(slugInput, activePortfolio.id);
+      if (!isAvailable) {
+        setSlugError("This handle is already taken. Please pick another.");
+        return;
+      }
+      updateActivePortfolio({ slug: slugInput });
+      await saveDraft({ ...activePortfolio, slug: slugInput });
+      setIsSuccessMessage(true);
+      setTimeout(() => setIsSuccessMessage(false), 2500);
+    } catch {
+      setSlugError("Could not save this handle. Check your connection and try again.");
+    }
   };
 
   const handleTogglePublish = async () => {

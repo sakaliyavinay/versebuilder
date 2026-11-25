@@ -117,6 +117,63 @@ export const PortfolioProvider = ({ children }) => {
     [accessToken, refreshPortfolios]
   );
 
+  const syncAccountIdentity = useCallback(
+    async (previousUser, nextUser, { syncProfile = true } = {}) => {
+      const portfolios = await refreshPortfolios();
+      const handlePortfolio = portfolios.find((portfolio) => portfolio.slug === previousUser.username);
+
+      if (handlePortfolio && nextUser.username !== previousUser.username) {
+        const available = isSupabaseConfigured
+          ? await isSupabaseSlugAvailable(nextUser.username, handlePortfolio.id, accessToken)
+          : storageService.isSlugAvailable(nextUser.username, handlePortfolio.id);
+        if (!available) throw new Error("That public handle is already used by another portfolio.");
+      }
+
+      const updatedPortfolios = [];
+      for (const portfolio of portfolios) {
+        const oldProfile = portfolio.profile || {};
+        const nextProfile = syncProfile
+          ? {
+              ...oldProfile,
+              displayName:
+                !oldProfile.displayName || oldProfile.displayName === previousUser.name
+                  ? nextUser.name
+                  : oldProfile.displayName,
+              avatarUrl:
+                !oldProfile.avatarUrl || oldProfile.avatarUrl === previousUser.avatar
+                  ? nextUser.avatar
+                  : oldProfile.avatarUrl,
+              bio:
+                !oldProfile.bio || oldProfile.bio === previousUser.bio
+                  ? nextUser.bio
+                  : oldProfile.bio,
+            }
+          : oldProfile;
+        const nextPortfolio = {
+          ...portfolio,
+          profile: nextProfile,
+          slug:
+            portfolio.id === handlePortfolio?.id && nextUser.username !== previousUser.username
+              ? nextUser.username
+              : portfolio.slug,
+        };
+        const saved = isSupabaseConfigured
+          ? await saveSupabasePortfolio(nextPortfolio, accessToken)
+          : storageService.savePortfolio(nextPortfolio);
+        updatedPortfolios.push(saved);
+        if (activePortfolioRef.current?.id === saved.id) {
+          activePortfolioRef.current = saved;
+          setActivePortfolio(saved);
+          setIsDirty(false);
+        }
+      }
+
+      await refreshPortfolios();
+      return updatedPortfolios;
+    },
+    [accessToken, refreshPortfolios]
+  );
+
   // Toggle publish state
   const setPublishStatus = useCallback(
     async (publishState = true) => {
@@ -167,8 +224,15 @@ export const PortfolioProvider = ({ children }) => {
         publishedAt: null,
         templateId: templateId || "dark-futuristic",
         themeSettings: {
-          accentColor: "#f5b84b",
+          accentColor: "",
           fontStyle: "Inter",
+          surfaceMode: "auto",
+          cardStyle: "rounded",
+          fontPairing: "modern-sans",
+          density: "balanced",
+          ctaText: "",
+          ctaUrl: "",
+          buttonStyle: "solid",
         },
         profile: {
           displayName: user.name,
@@ -223,6 +287,7 @@ export const PortfolioProvider = ({ children }) => {
           showTimeline: true,
           showContact: true,
           showDiscord: true,
+          sectionOrder: ["hero", "work", "skills", "timeline", "contact", "discord"],
         },
         updatedAt: new Date().toISOString(),
       };
@@ -326,6 +391,7 @@ export const PortfolioProvider = ({ children }) => {
         setActivePortfolio,
         updateActivePortfolio,
         saveDraft,
+        syncAccountIdentity,
         setPublishStatus,
         createPortfolio,
         deletePortfolio,

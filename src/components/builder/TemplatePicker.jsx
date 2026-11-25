@@ -1,8 +1,8 @@
-import { Check, Sparkles, Layout, Palette } from "lucide-react";
+import { Check, Sparkles, Layout, Palette, ArrowRight } from "lucide-react";
 import { TEMPLATES } from "../../templates/TemplateRegistry";
 import { usePortfolio } from "../../context/PortfolioContext";
 
-export const TemplatePicker = () => {
+export const TemplatePicker = ({ onOpenCustomizer }) => {
   const { activePortfolio, updateActivePortfolio } = usePortfolio();
   if (!activePortfolio) return null;
 
@@ -17,11 +17,35 @@ export const TemplatePicker = () => {
   return (
     <div className="editor-tab-pane">
       <div className="editor-section-header">
-        <h2>Choose Your Template</h2>
-        <p>
-          Switch between 8 visually distinct styles. Your existing profile, skills, photos, and videos will
-          dynamically adapt without losing any data.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
+          <div>
+            <h2>Choose Your Template</h2>
+            <p>
+              Switch between 8 visually distinct styles. Your existing profile, skills, photos, and videos will
+              dynamically adapt without losing any data.
+            </p>
+          </div>
+          {onOpenCustomizer && (
+            <button
+              type="button"
+              className="dash-btn"
+              onClick={onOpenCustomizer}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                borderColor: "rgba(245, 184, 75, 0.4)",
+                color: "#f5b84b",
+                padding: "8px 14px",
+                fontSize: "13px",
+              }}
+            >
+              <Palette size={15} />
+              <span>Customize Colors &amp; Styling</span>
+              <ArrowRight size={13} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="templates-showcase-grid">
