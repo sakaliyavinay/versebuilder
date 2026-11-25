@@ -345,6 +345,17 @@
   color: #94a3b8;
 }
 
+.create-modal-error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .create-modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -352,4 +363,9 @@
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.create-modal-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

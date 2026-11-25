@@ -30,6 +30,8 @@ export const DashboardPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("dark-futuristic");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   if (!user) {
     return (
@@ -56,14 +58,24 @@ export const DashboardPage = () => {
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    const created = await createPortfolio({
-      title: newTitle || `${user.name}'s Portfolio`,
-      templateId: selectedTemplate,
-    });
-    setIsCreateModalOpen(false);
-    setNewTitle("");
-    if (created?.id) {
-      navigate(`/builder/${created.id}`);
+    setCreateError("");
+    setCreating(true);
+    try {
+      const created = await createPortfolio({
+        title: newTitle || `${user.name}'s Portfolio`,
+        templateId: selectedTemplate,
+      });
+      if (created?.id) {
+        setIsCreateModalOpen(false);
+        setNewTitle("");
+        navigate(`/builder/${created.id}`);
+      } else {
+        setCreateError("Portfolio created but could not open it. Please refresh the page.");
+      }
+    } catch (err) {
+      setCreateError(err.message || "Failed to create portfolio. Check your connection or Supabase setup.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -265,16 +277,23 @@ export const DashboardPage = () => {
                 </div>
               </div>
 
+              {createError && (
+                <div className="create-modal-error">
+                  ⚠️ {createError}
+                </div>
+              )}
+
               <div className="create-modal-actions">
                 <button
                   type="button"
                   className="dash-btn"
                   onClick={() => setIsCreateModalOpen(false)}
+                  disabled={creating}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="dash-create-btn">
-                  Create & Open Builder
+                <button type="submit" className="dash-create-btn" disabled={creating}>
+                  {creating ? "Creating…" : "Create & Open Builder"}
                 </button>
               </div>
             </form>

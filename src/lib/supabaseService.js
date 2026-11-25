@@ -12,11 +12,16 @@ const PORTFOLIOS_TABLE = "portfolios";
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
-const getHeaders = (token = null) => ({
-  apikey: supabaseAnonKey,
-  Authorization: `Bearer ${token || supabaseAnonKey}`,
-  "Content-Type": "application/json",
-});
+const getHeaders = (token = null) => {
+  const headers = {
+    apikey: supabaseAnonKey,
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 const buildUserObject = (sbUser, fallbackName = "", fallbackUsername = "") => {
   const email = sbUser?.email || "";
@@ -312,7 +317,14 @@ export const saveSupabasePortfolio = async (portfolio, token = null) => {
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Supabase portfolio save error:", errorText);
-    throw new Error("Failed to save portfolio to Supabase database.");
+    let friendly = "Failed to save portfolio to Supabase database.";
+    try {
+      const parsed = JSON.parse(errorText);
+      friendly = parsed.message || parsed.hint || parsed.error_description || friendly;
+    } catch {
+      if (errorText) friendly = errorText;
+    }
+    throw new Error(friendly);
   }
 
   const result = await response.json();
