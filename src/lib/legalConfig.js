@@ -6,11 +6,11 @@
 
 export const LEGAL_CONFIG = {
   platformName: "VerseBuilder",
-  supportEmail: "support@versebuilder.com",
+  supportEmail: "sakaliyavinay@gmail.com",
   copyrightHolder: "VerseBuilder",
   lastUpdated: "November 25, 2026",
   siteUrl: "https://versebuilder.vercel.app",
-  reportAbuseEmail: "abuse@versebuilder.com",
+  reportAbuseEmail: "sakaliyavinay@gmail.com",
   companyLocation: "India",
   minimumAge: 13,
 };
