@@ -39,8 +39,11 @@ const buildUserObject = (sbUser, fallbackName = "", fallbackUsername = "") => {
     email,
     name: sbUser?.user_metadata?.name || fallbackName || cleanUsername,
     username: cleanUsername,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanUsername}`,
-    bio: "",
+    avatar:
+      sbUser?.user_metadata && Object.hasOwn(sbUser.user_metadata, "avatar")
+        ? sbUser.user_metadata.avatar
+        : `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanUsername}`,
+    bio: sbUser?.user_metadata?.bio || "",
     createdAt: sbUser?.created_at || new Date().toISOString(),
   };
 };
@@ -58,7 +61,7 @@ export const mapRowToPortfolio = (row) => {
     isPublished: Boolean(row.is_published),
     publishedAt: row.published_at || null,
     templateId: row.template_id || "dark-futuristic",
-    themeSettings: row.theme_settings || { accentColor: "#f5b84b", fontStyle: "Inter" },
+    themeSettings: row.theme_settings || {},
     profile: row.profile || {},
     skills: Array.isArray(row.skills) ? row.skills : [],
     stats: Array.isArray(row.stats) ? row.stats : [],
@@ -185,6 +188,58 @@ export const signOutFromSupabase = async (accessToken) => {
   }
 };
 
+/**
+ * Update authenticated user's profile metadata in Supabase Auth
+ */
+export const updateSupabaseProfile = async (accessToken, { name, username, avatar, bio }) => {
+  if (!isSupabaseConfigured || !accessToken) return null;
+
+  const metadata = {};
+  if (name !== undefined) metadata.name = name.trim();
+  if (username !== undefined) {
+    metadata.username = username.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "");
+  }
+  if (avatar !== undefined) metadata.avatar = avatar;
+  if (bio !== undefined) metadata.bio = bio.trim();
+
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    method: "PUT",
+    headers: getHeaders(accessToken),
+    body: JSON.stringify({
+      data: metadata,
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error_description || data.msg || data.message || "Failed to update profile.");
+  }
+
+  return buildUserObject(data);
+};
+
+/**
+ * Change authenticated user's password in Supabase Auth
+ */
+export const updateSupabasePassword = async (accessToken, newPassword) => {
+  if (!isSupabaseConfigured || !accessToken) return false;
+
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    method: "PUT",
+    headers: getHeaders(accessToken),
+    body: JSON.stringify({
+      password: newPassword,
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error_description || data.msg || data.message || "Failed to update password.");
+  }
+
+  return true;
+};
+
 // ---------------------------------------------------------------------------
 // 2. PORTFOLIO DATABASE OPERATIONS
 // ---------------------------------------------------------------------------
@@ -266,12 +321,12 @@ export const isSupabaseSlugAvailable = async (slug, excludePortfolioId = null, t
         headers: getHeaders(token),
       }
     );
-    if (!response.ok) return true;
+    if (!response.ok) throw new Error("Could not check public handle availability.");
     const rows = await response.json();
     if (!Array.isArray(rows) || rows.length === 0) return true;
     return rows.every((r) => r.id === excludePortfolioId);
-  } catch {
-    return true;
+  } catch (err) {
+    throw new Error(err.message || "Could not check public handle availability.");
   }
 };
 

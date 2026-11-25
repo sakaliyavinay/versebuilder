@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const SplitScreen = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -19,6 +20,8 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
+    sectionSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -35,30 +38,34 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
         {/* Left Sticky Half */}
         <section className="split-left-pane">
           <div className="split-left-content">
-            {profile.statusBadge && (
-              <div className="split-status-badge">
-                <span className="split-dot" />
-                <span>{profile.statusBadge}</span>
-              </div>
+            {sectionSettings.showHero !== false && (
+              <>
+                {profile.statusBadge && (
+                  <div className="split-status-badge">
+                    <span className="split-dot" />
+                    <span>{profile.statusBadge}</span>
+                  </div>
+                )}
+
+                <div className="split-author-head">
+                  <span className="split-tagline">{profile.tagline || "Creator Portfolio"}</span>
+                  <h1 className="split-name">{profile.displayName}</h1>
+                  <h2 className="split-headline">{profile.headline}</h2>
+                </div>
+
+                <p className="split-bio">{profile.bio}</p>
+              </>
             )}
 
-            <div className="split-author-head">
-              <span className="split-tagline">{profile.tagline || "Creator Portfolio"}</span>
-              <h1 className="split-name">{profile.displayName}</h1>
-              <h2 className="split-headline">{profile.headline}</h2>
-            </div>
-
-            <p className="split-bio">{profile.bio}</p>
-
             {/* Discord Presence */}
-            {discord.enabled !== false && (discord.username || discord.userId) && (
+            {sectionSettings.showDiscord !== false && discord.enabled !== false && (discord.username || discord.userId) && (
               <div className="split-discord-slot">
                 <DiscordPresenceBadge discord={discord} onOpenInquiry={() => setIsInquiryOpen(true)} />
               </div>
             )}
 
             {/* Metrics */}
-            {stats.length > 0 && (
+            {stats.length > 0 && sectionSettings.showHero !== false && (
               <div className="split-metrics-grid">
                 {stats.map((s, idx) => (
                   <div className="split-metric-card" key={idx}>
@@ -70,7 +77,7 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
             )}
 
             {/* Skills Pills */}
-            {skills.length > 0 && (
+            {skills.length > 0 && sectionSettings.showSkills !== false && (
               <div className="split-skills-block">
                 <span className="split-skills-heading">Core Skills</span>
                 <div className="split-skills-pills">
@@ -84,27 +91,29 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
             )}
 
             {/* Contact Actions */}
-            <div className="split-cta-group">
-              <button
-                type="button"
-                className="split-btn split-btn-primary"
-                onClick={() => setIsInquiryOpen(true)}
-              >
-                <Send size={16} /> {contact.buttonText || "Send Inquiry / Brief"}
-              </button>
+            {sectionSettings.showContact !== false && (
+              <div className="split-cta-group">
+                <button
+                  type="button"
+                  className="split-btn split-btn-primary"
+                  onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
+                >
+                  <Send size={16} /> {themeSettings.ctaText || contact.buttonText || "Send Inquiry / Brief"}
+                </button>
 
-              {contact.showEmail !== false && contact.email && (
-                <a href={`mailto:${contact.email}`} className="split-btn split-btn-ghost">
-                  <Mail size={16} /> Email
-                </a>
-              )}
+                {contact.showEmail !== false && contact.email && (
+                  <a href={`mailto:${contact.email}`} className="split-btn split-btn-ghost">
+                    <Mail size={16} /> Email
+                  </a>
+                )}
 
-              {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
-                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="split-btn split-btn-ghost">
-                  <Phone size={16} /> WhatsApp
-                </a>
-              )}
-            </div>
+                {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer" className="split-btn split-btn-ghost">
+                    <Phone size={16} /> WhatsApp
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Socials Footnote */}
             <div className="split-socials-row">
@@ -117,7 +126,8 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
         </section>
 
         {/* Right Scrollable Media Feed */}
-        <section className="split-right-pane">
+        {sectionSettings.showWork !== false && media.length > 0 && (
+          <section className="split-right-pane">
           <div className="split-feed-header">
             <h3>Selected Visual Projects ({media.length})</h3>
             <span className="split-feed-sub">Scroll through recent work</span>
@@ -187,7 +197,8 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
               </div>
             </div>
           )}
-        </section>
+          </section>
+        )}
       </div>
 
       {/* Modals */}

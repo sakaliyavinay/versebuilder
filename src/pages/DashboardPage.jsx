@@ -21,6 +21,7 @@ import { useAppRouter } from "../router/Router";
 import { TEMPLATES, getTemplateById } from "../templates/TemplateRegistry";
 import { PlatformNav } from "../components/navigation/PlatformNav";
 import { GlobalFooter } from "../components/common/GlobalFooter";
+import { openAccountSettings } from "../components/common/accountSettingsEvents";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
@@ -102,13 +103,28 @@ export const DashboardPage = () => {
               </p>
             </div>
 
-            <button
-              className="dash-create-btn"
-              onClick={() => setIsCreateModalOpen(true)}
-            >
-              <Plus size={18} />
-              <span>Create New Portfolio</span>
-            </button>
+            <div className="dash-header-action-group">
+              <button
+                className="dash-btn dash-btn-settings"
+                onClick={() => openAccountSettings()}
+                title="Edit account profile, avatar, and password"
+              >
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="dash-user-avatar-sm" />
+                ) : (
+                  <Edit3 size={16} />
+                )}
+                <span>Edit Profile</span>
+              </button>
+
+              <button
+                className="dash-create-btn"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                <Plus size={18} />
+                <span>Create New Portfolio</span>
+              </button>
+            </div>
           </div>
 
           {/* User Portfolio Cards Grid */}

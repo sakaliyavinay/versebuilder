@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -19,6 +20,7 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -58,9 +60,9 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
               <button
                 type="button"
                 className="neo-btn neo-btn-main"
-                onClick={() => setIsInquiryOpen(true)}
+                onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
               >
-                <Send size={18} /> Send Inquiry / Let's Work!
+                <Send size={18} /> {themeSettings.ctaText || "Send Inquiry / Let's Work!"}
               </button>
 
               {contact.showEmail !== false && contact.email && (
@@ -155,7 +157,7 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
 
       {/* Neo Skills Section */}
       {skills.length > 0 && (
-        <section className="neo-section">
+        <section className="neo-section neo-skills-section">
           <div className="neo-sec-header">
             <h2 className="neo-sec-title">Skills & Superpowers</h2>
             <span className="neo-badge neo-badge-purple">STACK</span>
@@ -174,7 +176,7 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
 
       {/* Neo Timeline Section */}
       {timeline.length > 0 && (
-        <section className="neo-section">
+        <section className="neo-section neo-timeline-section">
           <div className="neo-sec-header">
             <h2 className="neo-sec-title">The Story So Far</h2>
           </div>
@@ -200,7 +202,7 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
             <button
               type="button"
               className="neo-btn neo-btn-main neo-btn-lg"
-              onClick={() => setIsInquiryOpen(true)}
+              onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
             >
               <Send size={20} /> {contact.buttonText || "Send Project Inquiry"}
             </button>

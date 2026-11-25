@@ -7,6 +7,7 @@ import { SplitScreen } from "./SplitScreen";
 import { ClassicStructured } from "./ClassicStructured";
 import { MonochromeStudio } from "./MonochromeStudio";
 import { NeoBrutalist } from "./NeoBrutalist";
+import { CustomizedTemplateWrapper } from "./CustomizedTemplateWrapper";
 
 export const TEMPLATES = [
   {
@@ -104,7 +105,11 @@ export const getTemplateById = (templateId) => {
 };
 
 export const renderTemplate = (templateId, props) => {
-  const template = getTemplateById(templateId);
-  const Component = template.component;
-  return <Component {...props} />;
+  return (
+    <CustomizedTemplateWrapper
+      templateId={templateId}
+      portfolio={props.portfolio}
+      isPreview={props.isPreview}
+    />
+  );
 };

@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const MonochromeStudio = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -19,6 +20,7 @@ export const MonochromeStudio = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -43,8 +45,8 @@ export const MonochromeStudio = ({ portfolio, isPreview = false }) => {
         </div>
         <div className="mono-header-col mono-col-contact">
           <span className="mono-mono-label">[DISPATCH]</span>
-          <button className="mono-btn-inquiry" onClick={() => setIsInquiryOpen(true)}>
-            [INITIATE_INQUIRY]
+          <button className="mono-btn-inquiry" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
+            [{themeSettings.ctaText || "INITIATE_INQUIRY"}]
           </button>
         </div>
       </header>
@@ -193,7 +195,7 @@ export const MonochromeStudio = ({ portfolio, isPreview = false }) => {
             <h3>{contact.heading || "START COLLABORATION"}</h3>
             {contact.subheading && <p className="mono-footer-sub">{contact.subheading}</p>}
             <div className="mono-contact-actions">
-              <button className="mono-email-btn" onClick={() => setIsInquiryOpen(true)}>
+              <button className="mono-email-btn" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
                 {contact.buttonText || "SEND DISPATCH / INQUIRY"}
               </button>
 

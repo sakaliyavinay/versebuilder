@@ -10,6 +10,7 @@ import {
   Sparkles,
   MessageSquare,
   Phone,
+  Palette,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { usePortfolio } from "../context/PortfolioContext";
@@ -19,6 +20,7 @@ import { ProfileEditor } from "../components/builder/ProfileEditor";
 import { SkillsEditor } from "../components/builder/SkillsEditor";
 import { MediaManager } from "../components/builder/MediaManager";
 import { TemplatePicker } from "../components/builder/TemplatePicker";
+import { TemplateCustomizer } from "../components/builder/TemplateCustomizer";
 import { ContactEditor } from "../components/builder/ContactEditor";
 import { PublishModal } from "../components/builder/PublishModal";
 import { LivePreviewFrame } from "../components/preview/LivePreviewFrame";
@@ -206,6 +208,14 @@ export const BuilderPage = () => {
               <Layout size={16} />
               <span>Templates (8)</span>
             </button>
+
+            <button
+              className={`builder-tab-btn ${activeTab === "customize" ? "active" : ""}`}
+              onClick={() => setActiveTab("customize")}
+            >
+              <Palette size={16} />
+              <span>Style &amp; Theme</span>
+            </button>
           </div>
 
           <div className="builder-editor-scroll-area">
@@ -213,7 +223,8 @@ export const BuilderPage = () => {
             {activeTab === "skills" && <SkillsEditor />}
             {activeTab === "media" && <MediaManager />}
             {activeTab === "contact" && <ContactEditor />}
-            {activeTab === "template" && <TemplatePicker />}
+            {activeTab === "template" && <TemplatePicker onOpenCustomizer={() => setActiveTab("customize")} />}
+            {activeTab === "customize" && <TemplateCustomizer />}
           </div>
         </div>
 
@@ -237,6 +248,7 @@ export const BuilderPage = () => {
 
       {/* Publish Modal */}
       <PublishModal
+        key={activePortfolio?.id || "no-portfolio"}
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
       />

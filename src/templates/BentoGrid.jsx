@@ -4,6 +4,7 @@ import { VideoModal } from "../components/common/VideoModal";
 import { MediaLightbox } from "../components/common/MediaLightbox";
 import { DiscordPresenceBadge } from "../components/common/DiscordPresenceBadge";
 import { InquiryModal } from "../components/common/InquiryModal";
+import { activatePortfolioCta } from "./portfolioCta";
 
 export const BentoGrid = ({ portfolio, isPreview = false }) => {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -19,6 +20,8 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
     socials = {},
     contact = {},
     discord = {},
+    themeSettings = {},
+    sectionSettings = {},
   } = portfolio;
 
   const videos = media.filter((m) => m.type === "video");
@@ -39,8 +42,8 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
           <span>{profile.statusBadge || "Available for collaboration"}</span>
         </div>
         <div className="bento-top-actions">
-          <button className="bento-contact-pill" onClick={() => setIsInquiryOpen(true)}>
-            <Send size={13} /> {contact.buttonText || "Send Inquiry"}
+          <button className="bento-contact-pill" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
+            <Send size={13} /> {themeSettings.ctaText || contact.buttonText || "Send Inquiry"}
           </button>
           {contact.showEmail !== false && contact.email && (
             <a href={`mailto:${contact.email}`} className="bento-btn bento-btn-subtle">
@@ -53,58 +56,60 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
       {/* Main Bento Grid */}
       <div className="bento-grid-container">
         {/* Tile 1: Hero Profile (Spans 8 columns on desktop) */}
-        <div className="bento-card bento-card-hero">
-          <div className="bento-card-bg-glow" />
-          <div className="bento-hero-head">
-            <div className="bento-avatar-wrap">
-              {profile.avatarUrl ? (
-                <img src={profile.avatarUrl} alt={profile.displayName} className="bento-avatar" />
-              ) : (
-                <div className="bento-avatar-placeholder">{profile.displayName?.charAt(0)}</div>
-              )}
+        {sectionSettings.showHero !== false && (
+          <div className="bento-card bento-card-hero">
+            <div className="bento-card-bg-glow" />
+            <div className="bento-hero-head">
+              <div className="bento-avatar-wrap">
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt={profile.displayName} className="bento-avatar" />
+                ) : (
+                  <div className="bento-avatar-placeholder">{profile.displayName?.charAt(0)}</div>
+                )}
+              </div>
+              <div>
+                <span className="bento-tagline">{profile.tagline || "Creative Specialist"}</span>
+                <h1 className="bento-title">{profile.displayName}</h1>
+                {profile.location && (
+                  <span className="bento-location">
+                    <MapPin size={13} /> {profile.location}
+                  </span>
+                )}
+              </div>
             </div>
-            <div>
-              <span className="bento-tagline">{profile.tagline || "Creative Specialist"}</span>
-              <h1 className="bento-title">{profile.displayName}</h1>
-              {profile.location && (
-                <span className="bento-location">
-                  <MapPin size={13} /> {profile.location}
-                </span>
-              )}
-            </div>
-          </div>
-          <h2 className="bento-headline">{profile.headline}</h2>
-          <p className="bento-bio">{profile.bio}</p>
+            <h2 className="bento-headline">{profile.headline}</h2>
+            <p className="bento-bio">{profile.bio}</p>
 
-          <div className="bento-hero-links">
-            <button className="bento-btn bento-btn-primary" onClick={() => setIsInquiryOpen(true)}>
-              <Send size={14} /> {contact.buttonText || "Send Inquiry / Brief"}
-            </button>
-            {contact.showEmail !== false && contact.email && (
-              <a href={`mailto:${contact.email}`} className="bento-btn bento-btn-subtle">
-                <Mail size={14} /> Email
-              </a>
-            )}
-            {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
-              <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
-                <Phone size={14} /> WhatsApp
-              </a>
-            )}
-            {socials.twitter && (
-              <a href={socials.twitter} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
-                Twitter/X
-              </a>
-            )}
-            {socials.github && (
-              <a href={socials.github} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
-                GitHub
-              </a>
-            )}
+            <div className="bento-hero-links">
+              <button className="bento-btn bento-btn-primary" onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}>
+                <Send size={14} /> {themeSettings.ctaText || contact.buttonText || "Send Inquiry / Brief"}
+              </button>
+              {contact.showEmail !== false && contact.email && (
+                <a href={`mailto:${contact.email}`} className="bento-btn bento-btn-subtle">
+                  <Mail size={14} /> Email
+                </a>
+              )}
+              {contact.showPhone && contact.isWhatsApp && whatsappUrl && (
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
+                  <Phone size={14} /> WhatsApp
+                </a>
+              )}
+              {socials.twitter && (
+                <a href={socials.twitter} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
+                  Twitter/X
+                </a>
+              )}
+              {socials.github && (
+                <a href={socials.github} target="_blank" rel="noreferrer" className="bento-btn bento-btn-subtle">
+                  GitHub
+                </a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Tile 2: Metric Badges Tile (Spans 4 columns) */}
-        {stats.length > 0 && (
+        {stats.length > 0 && sectionSettings.showHero !== false && (
           <div className="bento-card bento-card-stats">
             <div className="bento-card-title-row">
               <Sparkles size={16} className="bento-icon-accent" />
@@ -122,7 +127,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         )}
 
         {/* Tile: Discord Presence Tile (Spans 4 columns) */}
-        {discord.enabled !== false && (discord.username || discord.userId) && (
+        {sectionSettings.showDiscord !== false && discord.enabled !== false && (discord.username || discord.userId) && (
           <div className="bento-card bento-card-discord">
             <div className="bento-card-title-row">
               <span className="text-discord">⚡ Discord Connection</span>
@@ -132,7 +137,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         )}
 
         {/* Tile 3: Skills & Tech Stack Tile (Spans 4 columns) */}
-        {skills.length > 0 && (
+        {skills.length > 0 && sectionSettings.showSkills !== false && (
           <div className="bento-card bento-card-skills">
             <div className="bento-card-title-row">
               <Zap size={16} className="bento-icon-accent" />
@@ -150,7 +155,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         )}
 
         {/* Tile 4: Featured Video Showcase Tile (Spans 8 columns) */}
-        {featuredVideo && (
+        {featuredVideo && sectionSettings.showWork !== false && (
           <div
             className="bento-card bento-card-video"
             onClick={() => setActiveVideo(featuredVideo)}
@@ -177,7 +182,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         )}
 
         {/* Photo Gallery Tiles */}
-        {photos.map((photo, pIdx) => (
+        {sectionSettings.showWork !== false && photos.map((photo, pIdx) => (
           <div
             className="bento-card bento-card-photo"
             key={photo.id || pIdx}
@@ -202,7 +207,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         ))}
 
         {/* Other videos */}
-        {videos.filter((v) => v.id !== featuredVideo?.id).map((vid) => (
+        {sectionSettings.showWork !== false && videos.filter((v) => v.id !== featuredVideo?.id).map((vid) => (
           <div
             className="bento-card bento-card-extra-video"
             key={vid.id}
@@ -222,7 +227,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         ))}
 
         {/* Timeline */}
-        {timeline.length > 0 && (
+        {timeline.length > 0 && sectionSettings.showTimeline !== false && (
           <div className="bento-card bento-card-timeline">
             <div className="bento-card-title-row">
               <Award size={16} className="bento-icon-accent" />
@@ -243,7 +248,8 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
         )}
 
         {/* Channels & Networks */}
-        <div className="bento-card bento-card-socials">
+        {sectionSettings.showContact !== false && (
+          <div className="bento-card bento-card-socials">
           <div className="bento-card-title-row">
             <Layers size={16} className="bento-icon-accent" />
             <span>Channels & Inquiries</span>
@@ -252,10 +258,10 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
             <button
               type="button"
               className="bento-social-tile"
-              onClick={() => setIsInquiryOpen(true)}
+              onClick={() => activatePortfolioCta(portfolio, () => setIsInquiryOpen(true))}
             >
               <Send size={18} />
-              <span>Inquiry</span>
+              <span>{themeSettings.ctaText || "Inquiry"}</span>
             </button>
 
             {contact.showEmail !== false && contact.email && (
@@ -294,6 +300,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
             )}
           </div>
         </div>
+        )}
       </div>
 
       {/* Modals */}
