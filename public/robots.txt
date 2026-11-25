@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow private user workspaces and auth screens from search results
+Disallow: /dashboard
+Disallow: /builder/
+Disallow: /login
+Disallow: /signup
+
+# Allow public discovery
+Allow: /u/
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /acceptable-use
+
+Sitemap: https://versebuilder.vercel.app/sitemap.xml
