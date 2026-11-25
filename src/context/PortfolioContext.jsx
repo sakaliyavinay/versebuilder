@@ -1,11 +1,20 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { storageService } from "../lib/storageService";
+import {
+  isSupabaseConfigured,
+  getSupabasePortfoliosByUserId,
+  getSupabasePortfolioById,
+  getSupabasePortfolioBySlug,
+  saveSupabasePortfolio,
+  deleteSupabasePortfolio,
+  isSupabaseSlugAvailable,
+} from "../lib/supabaseService";
 import { useAuth } from "./AuthContext";
 
 const PortfolioContext = createContext(null);
 
 export const PortfolioProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [userPortfolios, setUserPortfolios] = useState([]);
   const [activePortfolio, setActivePortfolio] = useState(null);
   const activePortfolioRef = useRef(activePortfolio);
@@ -17,16 +26,22 @@ export const PortfolioProvider = ({ children }) => {
   const [saveError, setSaveError] = useState(null);
 
   // Refresh user's portfolios whenever user changes
-  const refreshPortfolios = useCallback(() => {
-    if (user?.id) {
-      const ports = storageService.getPortfoliosByUserId(user.id);
-      setUserPortfolios(ports);
-      return ports;
-    } else {
+  const refreshPortfolios = useCallback(async () => {
+    if (!user?.id) {
       setUserPortfolios([]);
       return [];
     }
-  }, [user?.id]);
+
+    if (isSupabaseConfigured) {
+      const ports = await getSupabasePortfoliosByUserId(user.id, accessToken);
+      setUserPortfolios(ports);
+      return ports;
+    }
+
+    const ports = storageService.getPortfoliosByUserId(user.id);
+    setUserPortfolios(ports);
+    return ports;
+  }, [user?.id, accessToken]);
 
   useEffect(() => {
     refreshPortfolios();
@@ -34,8 +49,15 @@ export const PortfolioProvider = ({ children }) => {
 
   // Load a portfolio for editing
   const loadPortfolio = useCallback(
-    (portfolioId) => {
-      const port = storageService.getPortfolioById(portfolioId);
+    async (portfolioId) => {
+      let port = null;
+
+      if (isSupabaseConfigured) {
+        port = await getSupabasePortfolioById(portfolioId, accessToken);
+      } else {
+        port = storageService.getPortfolioById(portfolioId);
+      }
+
       if (!port) return null;
 
       // Ownership check: user can only edit their own portfolio
@@ -48,7 +70,7 @@ export const PortfolioProvider = ({ children }) => {
       setIsDirty(false);
       return { portfolio: port };
     },
-    [user]
+    [user, accessToken]
   );
 
   // Update in-memory state of active portfolio
@@ -62,22 +84,27 @@ export const PortfolioProvider = ({ children }) => {
     setIsDirty(true);
   }, []);
 
-  // Save changes to storage
+  // Save changes to storage (Supabase when configured, else localStorage)
   const saveDraft = useCallback(
-    (customPortfolio = null) => {
+    async (customPortfolio = null) => {
       const target = customPortfolio || activePortfolioRef.current;
       if (!target) return null;
 
       setIsSaving(true);
       setSaveError(null);
       try {
-        const saved = storageService.savePortfolio(target);
+        let saved;
+        if (isSupabaseConfigured) {
+          saved = await saveSupabasePortfolio(target, accessToken);
+        } else {
+          saved = storageService.savePortfolio(target);
+        }
+
         activePortfolioRef.current = saved;
         setActivePortfolio(saved);
         setIsDirty(false);
-        const now = new Date();
-        setLastSavedAt(now);
-        refreshPortfolios();
+        setLastSavedAt(new Date());
+        await refreshPortfolios();
         return saved;
       } catch (err) {
         console.error("saveDraft failed:", err);
@@ -87,12 +114,12 @@ export const PortfolioProvider = ({ children }) => {
         setIsSaving(false);
       }
     },
-    [refreshPortfolios]
+    [accessToken, refreshPortfolios]
   );
 
   // Toggle publish state
   const setPublishStatus = useCallback(
-    (publishState = true) => {
+    async (publishState = true) => {
       const current = activePortfolioRef.current;
       if (!current) return null;
       const updated = {
@@ -105,22 +132,30 @@ export const PortfolioProvider = ({ children }) => {
     [saveDraft]
   );
 
-  // Create a new portfolio
+  // Create a new blank portfolio
   const createPortfolio = useCallback(
-    ({ title, templateId = "dark-futuristic" }) => {
+    async ({ title, templateId = "dark-futuristic" }) => {
       if (!user) throw new Error("Must be logged in to create a portfolio.");
 
-      const baseSlug = (title || user.username)
+      const baseSlug = (title || user.username || "portfolio")
         .toLowerCase()
         .replace(/[^a-z0-9_-]/g, "-")
         .replace(/-+/g, "-")
-        .slice(0, 24);
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 24) || "portfolio";
 
       let cleanSlug = baseSlug;
       let count = 1;
-      while (!storageService.isSlugAvailable(cleanSlug)) {
-        cleanSlug = `${baseSlug}-${count}`;
-        count++;
+      if (isSupabaseConfigured) {
+        while (!(await isSupabaseSlugAvailable(cleanSlug, null, accessToken))) {
+          cleanSlug = `${baseSlug}-${count}`;
+          count++;
+        }
+      } else {
+        while (!storageService.isSlugAvailable(cleanSlug)) {
+          cleanSlug = `${baseSlug}-${count}`;
+          count++;
+        }
       }
 
       const newPortfolio = {
@@ -137,36 +172,17 @@ export const PortfolioProvider = ({ children }) => {
         },
         profile: {
           displayName: user.name,
-          headline: "Creative professional crafting modern digital work.",
-          tagline: "Creator & Designer",
-          bio: "Welcome to my portfolio! I specialize in high quality media production, design, and digital experiences.",
-          location: "Remote Worldwide",
+          headline: "",
+          tagline: "",
+          bio: "",
+          location: "",
           avatarUrl: user.avatar,
           heroImage: "",
-          statusBadge: "Available for new projects",
+          statusBadge: "",
         },
-        skills: [
-          { id: `sk-${Date.now()}-1`, name: "Visual Design", level: 90, category: "Design" },
-          { id: `sk-${Date.now()}-2`, name: "Creative Direction", level: 85, category: "Direction" },
-          { id: `sk-${Date.now()}-3`, name: "Project Delivery", level: 88, category: "Production" },
-        ],
-        stats: [
-          { label: "Completed", value: "15+" },
-          { label: "Clients", value: "8+" },
-          { label: "Rating", value: "4.9/5" },
-        ],
-        timeline: [
-          {
-            year: "2025",
-            title: "Started Creative Portfolio",
-            description: "Developing visual voice and client partnerships.",
-          },
-          {
-            year: "2026",
-            title: "Expanding Independent Practice",
-            description: "Delivering larger commercial and creator assets.",
-          },
-        ],
+        skills: [],
+        stats: [],
+        timeline: [],
         media: [],
         socials: {
           email: user.email,
@@ -200,50 +216,101 @@ export const PortfolioProvider = ({ children }) => {
           showPresence: false,
           allowInquiries: true,
         },
+        sectionSettings: {
+          showHero: true,
+          showWork: true,
+          showSkills: true,
+          showTimeline: true,
+          showContact: true,
+          showDiscord: true,
+        },
         updatedAt: new Date().toISOString(),
       };
 
-      const saved = storageService.savePortfolio(newPortfolio);
-      refreshPortfolios();
+      let saved;
+      if (isSupabaseConfigured) {
+        saved = await saveSupabasePortfolio(newPortfolio, accessToken);
+      } else {
+        saved = storageService.savePortfolio(newPortfolio);
+      }
+      await refreshPortfolios();
       return saved;
     },
-    [user, refreshPortfolios]
+    [user, accessToken, refreshPortfolios]
   );
 
   // Delete portfolio
   const deletePortfolio = useCallback(
-    (id) => {
-      storageService.deletePortfolio(id);
-      refreshPortfolios();
-      if (activePortfolio?.id === id) {
+    async (id) => {
+      if (isSupabaseConfigured) {
+        await deleteSupabasePortfolio(id, accessToken);
+      } else {
+        storageService.deletePortfolio(id);
+      }
+      await refreshPortfolios();
+      if (activePortfolioRef.current?.id === id) {
+        activePortfolioRef.current = null;
         setActivePortfolio(null);
       }
     },
-    [activePortfolio?.id, refreshPortfolios]
+    [accessToken, refreshPortfolios]
   );
 
   // Duplicate portfolio
   const duplicatePortfolio = useCallback(
-    (id) => {
+    async (id) => {
       if (!user) return null;
+      if (isSupabaseConfigured) {
+        const original = await getSupabasePortfolioById(id, accessToken);
+        if (!original) return null;
+        let newSlug = `${original.slug}-copy`;
+        let counter = 1;
+        while (!(await isSupabaseSlugAvailable(newSlug, null, accessToken))) {
+          newSlug = `${original.slug}-copy-${counter}`;
+          counter++;
+        }
+        const copy = {
+          ...original,
+          id: `port_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          userId: user.id,
+          slug: newSlug,
+          title: `${original.title} (Copy)`,
+          isPublished: false,
+          publishedAt: null,
+          updatedAt: new Date().toISOString(),
+        };
+        const saved = await saveSupabasePortfolio(copy, accessToken);
+        await refreshPortfolios();
+        return saved;
+      }
+
       const dup = storageService.duplicatePortfolio(id, user.id);
-      refreshPortfolios();
+      await refreshPortfolios();
       return dup;
     },
-    [user, refreshPortfolios]
+    [user, accessToken, refreshPortfolios]
   );
 
   // Fetch public portfolio by slug
-  const getPublicPortfolio = useCallback((slug) => {
-    return storageService.getPortfolioBySlug(slug);
-  }, []);
+  const getPublicPortfolio = useCallback(
+    async (slug) => {
+      if (isSupabaseConfigured) {
+        return getSupabasePortfolioBySlug(slug, accessToken);
+      }
+      return storageService.getPortfolioBySlug(slug);
+    },
+    [accessToken]
+  );
 
   // Validate slug
   const validateSlug = useCallback(
-    (slug, currentPortfolioId = null) => {
+    async (slug, currentPortfolioId = null) => {
+      if (isSupabaseConfigured) {
+        return isSupabaseSlugAvailable(slug, currentPortfolioId, accessToken);
+      }
       return storageService.isSlugAvailable(slug, currentPortfolioId);
     },
-    []
+    [accessToken]
   );
 
   return (

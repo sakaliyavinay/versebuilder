@@ -54,20 +54,22 @@ export const DashboardPage = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleCreateSubmit = (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
-    const created = createPortfolio({
+    const created = await createPortfolio({
       title: newTitle || `${user.name}'s Portfolio`,
       templateId: selectedTemplate,
     });
     setIsCreateModalOpen(false);
     setNewTitle("");
-    navigate(`/builder/${created.id}`);
+    if (created?.id) {
+      navigate(`/builder/${created.id}`);
+    }
   };
 
-  const handleDelete = (id, title) => {
+  const handleDelete = async (id, title) => {
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
-      deletePortfolio(id);
+      await deletePortfolio(id);
     }
   };
 

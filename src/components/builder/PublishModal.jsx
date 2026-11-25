@@ -32,7 +32,7 @@ export const PublishModal = ({ isOpen, onClose }) => {
 
   const publicUrl = `${window.location.origin}/u/${activePortfolio.slug}`;
 
-  const handleSlugChange = (val) => {
+  const handleSlugChange = async (val) => {
     const clean = val
       .toLowerCase()
       .replace(/[^a-z0-9_-]/g, "-")
@@ -44,7 +44,7 @@ export const PublishModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    const isAvail = validateSlug(clean, activePortfolio.id);
+    const isAvail = await validateSlug(clean, activePortfolio.id);
     if (!isAvail) {
       setSlugError("This handle is already taken. Please pick another.");
     } else {
@@ -52,17 +52,17 @@ export const PublishModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSaveSlug = () => {
+  const handleSaveSlug = async () => {
     if (slugError || !slugInput) return;
     updateActivePortfolio({ slug: slugInput });
-    saveDraft({ ...activePortfolio, slug: slugInput });
+    await saveDraft({ ...activePortfolio, slug: slugInput });
     setIsSuccessMessage(true);
     setTimeout(() => setIsSuccessMessage(false), 2500);
   };
 
-  const handleTogglePublish = () => {
+  const handleTogglePublish = async () => {
     const nextStatus = !activePortfolio.isPublished;
-    setPublishStatus(nextStatus);
+    await setPublishStatus(nextStatus);
     if (nextStatus) {
       setIsSuccessMessage(true);
       setTimeout(() => setIsSuccessMessage(false), 3000);

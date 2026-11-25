@@ -14,18 +14,27 @@ export const AuthPage = ({ initialMode = "login" }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setNotice("");
     setLoading(true);
 
     try {
       if (mode === "signup") {
         if (!name.trim()) throw new Error("Please enter your name.");
         if (!email.trim()) throw new Error("Please enter your email.");
-        await signup({ name, email, password, username });
+        const res = await signup({ name, email, password, username });
+        if (res?.needsEmailConfirmation) {
+          setNotice(
+            `Account created for ${res.email}! Please check your email inbox and click the confirmation link, then log in.`
+          );
+          setMode("login");
+          return;
+        }
       } else {
         await login({ email, password });
       }
@@ -76,6 +85,20 @@ export const AuthPage = ({ initialMode = "login" }) => {
               Sign Up
             </button>
           </div>
+
+          {notice && (
+            <div
+              className="auth-error-alert"
+              style={{
+                background: "rgba(34, 197, 94, 0.14)",
+                borderColor: "rgba(34, 197, 94, 0.45)",
+                color: "#4ade80",
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>{notice}</span>
+            </div>
+          )}
 
           {error && (
             <div className="auth-error-alert">

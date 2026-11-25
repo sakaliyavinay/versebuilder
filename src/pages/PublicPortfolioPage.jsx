@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { renderTemplate } from "../templates/TemplateRegistry";
 import { storageService } from "../lib/storageService";
+import { isSupabaseConfigured, getSupabasePortfolioBySlug } from "../lib/supabaseService";
 import { useAuth } from "../context/AuthContext";
 import { useAppRouter } from "../router/Router";
 import { PublishedPill } from "../components/navigation/PublishedPill";
@@ -8,7 +9,7 @@ import { Lock, Sparkles, ArrowLeft, Edit3, Globe, Copy, Check } from "lucide-rea
 
 export const PublicPortfolioPage = () => {
   const { currentRoute, navigate } = useAppRouter();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -16,20 +17,43 @@ export const PublicPortfolioPage = () => {
   const slug = currentRoute.slug;
 
   useEffect(() => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
-    const found = storageService.getPortfolioBySlug(slug);
-    setPortfolio(found);
-    setLoading(false);
+    const loadPublic = async () => {
+      if (!slug) {
+        setLoading(false);
+        return;
+      }
 
-    // Record analytics view if portfolio exists and is published
-    if (found && found.isPublished) {
-      storageService.recordAnalyticsView(slug);
-    }
-  }, [slug]);
+      setLoading(true);
+      try {
+        let found = null;
+        if (isSupabaseConfigured) {
+          found = await getSupabasePortfolioBySlug(slug, accessToken);
+        } else {
+          found = storageService.getPortfolioBySlug(slug);
+          if (found && found.isPublished) {
+            storageService.recordAnalyticsView(slug);
+          }
+        }
+
+        if (!cancelled) {
+          setPortfolio(found);
+        }
+      } catch (err) {
+        console.error("Failed to load public portfolio:", err);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadPublic();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, accessToken]);
 
   if (loading) {
     return (

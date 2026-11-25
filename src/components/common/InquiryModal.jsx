@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Send, Sparkles, CheckCircle2, MessageSquare, Mail, Phone } from "lucide-react";
 import { sendDiscordInquiryWebhook } from "../../lib/discordService";
 import { storageService } from "../../lib/storageService";
+import { isSupabaseConfigured } from "../../lib/supabaseService";
 
 export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
   const [name, setName] = useState("");
@@ -59,16 +60,18 @@ export const InquiryModal = ({ isOpen, onClose, portfolio }) => {
 
     inquiryRecord.dispatchedToDiscord = discordDispatched;
 
-    // 2. Persist to creator's portfolio inbox
-    try {
-      const currentPort = storageService.getPortfolioById(portfolio.id);
-      if (currentPort) {
-        const inbox = currentPort.inbox || [];
-        currentPort.inbox = [inquiryRecord, ...inbox];
-        storageService.savePortfolio(currentPort);
+    // 2. Persist to creator's portfolio inbox (when running in local storage mode)
+    if (!isSupabaseConfigured) {
+      try {
+        const currentPort = storageService.getPortfolioById(portfolio.id);
+        if (currentPort) {
+          const inbox = currentPort.inbox || [];
+          currentPort.inbox = [inquiryRecord, ...inbox];
+          storageService.savePortfolio(currentPort);
+        }
+      } catch (err) {
+        console.error("Failed to save inquiry to storage inbox", err);
       }
-    } catch (err) {
-      console.error("Failed to save inquiry to storage inbox", err);
     }
 
     setSending(false);

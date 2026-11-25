@@ -68,10 +68,10 @@ export const MediaManager = () => {
       let finalUrl = result.dataUrl;
       let finalThumbUrl = result.dataUrl;
 
-      // Upload directly to Cloudinary if configured
+      // Upload compressed image directly to Cloudinary if configured
       if (isCloudinaryConfigured) {
         setProcessingStatus("Uploading compressed image to Cloudinary CDN...");
-        const cloudRes = await uploadToCloudinary(file, {
+        const cloudRes = await uploadToCloudinary(result.dataUrl || file, {
           folder: "versebuilder/photos",
           onProgress: (pct, msg) => {
             setProcessingProgress(pct);

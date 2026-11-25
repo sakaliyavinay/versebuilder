@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Upload, Plus, Trash2, User, Sparkles, MapPin, Calendar, Clock, Image as ImageIcon } from "lucide-react";
 import { usePortfolio } from "../../context/PortfolioContext";
+import { compressImage } from "../../lib/mediaCompressor";
 import { uploadToCloudinary, isCloudinaryConfigured } from "../../lib/cloudinaryService";
 
 export const ProfileEditor = () => {
@@ -19,28 +20,45 @@ export const ProfileEditor = () => {
     }));
   };
 
-  // Avatar file upload handler
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Avatar file upload handler (compresses + uploads to Cloudinary if configured)
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (isCloudinaryConfigured) {
-      try {
-        const cloudRes = await uploadToCloudinary(file, { folder: "versebuilder/avatars" });
-        if (cloudRes?.url) {
-          updateProfileField("avatarUrl", cloudRes.url);
-          return;
-        }
-      } catch (err) {
-        console.warn("Cloudinary avatar upload fallback:", err);
-      }
-    }
+    setUploadingAvatar(true);
+    try {
+      const compressed = await compressImage(file, {
+        maxWidth: 640,
+        maxHeight: 640,
+        quality: 0.85,
+      });
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      updateProfileField("avatarUrl", reader.result);
-    };
-    reader.readAsDataURL(file);
+      if (isCloudinaryConfigured) {
+        try {
+          const cloudRes = await uploadToCloudinary(compressed.dataUrl || file, {
+            folder: "versebuilder/avatars",
+          });
+          if (cloudRes?.url) {
+            updateProfileField("avatarUrl", cloudRes.url);
+            return;
+          }
+        } catch (err) {
+          console.warn("Cloudinary avatar upload fallback:", err);
+        }
+      }
+
+      updateProfileField("avatarUrl", compressed.dataUrl);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => {
+        updateProfileField("avatarUrl", reader.result);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   // Stats handlers
@@ -109,8 +127,14 @@ export const ProfileEditor = () => {
           <div className="avatar-inputs-col">
             <label className="editor-btn-upload">
               <Upload size={16} />
-              <span>Upload Photo from Computer</span>
-              <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden-file-input" />
+              <span>{uploadingAvatar ? "Compressing & Uploading..." : "Upload Photo from Computer"}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
+                className="hidden-file-input"
+              />
             </label>
             <span className="or-divider-text">or paste image URL</span>
             <input

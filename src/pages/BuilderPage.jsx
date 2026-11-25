@@ -38,38 +38,51 @@ export const BuilderPage = () => {
   const portfolioId = currentRoute.portfolioId;
 
   useEffect(() => {
-    if (!user) {
-      setAuthError("not_logged_in");
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
-    let targetId = portfolioId;
-    if (!targetId && userPortfolios.length > 0) {
-      targetId = userPortfolios[0].id;
-    }
-
-    if (targetId) {
-      // Don't re-fetch from disk if this portfolio is already the active working copy
-      if (activePortfolio?.id === targetId) {
-        setAuthError(null);
+    const loadTarget = async () => {
+      if (!user) {
+        setAuthError("not_logged_in");
         setLoading(false);
         return;
       }
 
-      const res = loadPortfolio(targetId);
-      if (res?.error === "unauthorized") {
-        setAuthError("unauthorized");
-      } else if (!res?.portfolio) {
-        setAuthError("not_found");
-      } else {
-        setAuthError(null);
+      let targetId = portfolioId;
+      if (!targetId && userPortfolios.length > 0) {
+        targetId = userPortfolios[0].id;
       }
-    } else {
-      setAuthError("no_portfolios");
-    }
 
-    setLoading(false);
+      if (targetId) {
+        // Don't re-fetch if this portfolio is already the active working copy
+        if (activePortfolio?.id === targetId) {
+          setAuthError(null);
+          setLoading(false);
+          return;
+        }
+
+        const res = await loadPortfolio(targetId);
+        if (cancelled) return;
+
+        if (res?.error === "unauthorized") {
+          setAuthError("unauthorized");
+        } else if (!res?.portfolio) {
+          setAuthError("not_found");
+        } else {
+          setAuthError(null);
+        }
+      } else {
+        setAuthError("no_portfolios");
+      }
+
+      if (!cancelled) {
+        setLoading(false);
+      }
+    };
+
+    loadTarget();
+    return () => {
+      cancelled = true;
+    };
   }, [user, portfolioId, userPortfolios, loadPortfolio, activePortfolio?.id]);
 
   if (loading) {
