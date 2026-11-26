@@ -20,6 +20,7 @@ import "./styles/landing.css";
 import "./styles/dashboard.css";
 import "./styles/legal.css";
 import "./styles/customizer.css";
+import "./styles/mobile.css";
 
 function AppContent() {
   const { currentRoute } = useAppRouter();

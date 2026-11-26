@@ -8,6 +8,8 @@ import {
   ChevronDown,
   Layers,
   Settings,
+  Menu,
+  X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useAppRouter } from "../../router/Router";
@@ -17,6 +19,7 @@ export const PlatformNav = () => {
   const { user, logout } = useAuth();
   const { navigate, currentRoute } = useAppRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="platform-nav">
@@ -30,25 +33,45 @@ export const PlatformNav = () => {
         </div>
 
         {/* Center Links */}
-        <nav className="platform-nav-menu">
+        <nav className={`platform-nav-menu ${mobileMenuOpen ? "is-open" : ""}`} id="platform-mobile-navigation">
           <button
             className={`nav-link-btn ${currentRoute.name === "landing" ? "active" : ""}`}
-            onClick={() => navigate("/")}
+            onClick={() => { setMobileMenuOpen(false); navigate("/"); }}
           >
             Home
           </button>
           {user && (
             <button
               className={`nav-link-btn ${currentRoute.name === "dashboard" ? "active" : ""}`}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}
             >
               Dashboard
             </button>
+          )}
+          {!user && (
+            <div className="mobile-nav-auth">
+              <button className="nav-link-btn" onClick={() => { setMobileMenuOpen(false); navigate("/login"); }}>
+                Log In
+              </button>
+              <button className="nav-link-btn" onClick={() => { setMobileMenuOpen(false); navigate("/signup"); }}>
+                Sign Up Free
+              </button>
+            </div>
           )}
         </nav>
 
         {/* Right User State */}
         <div className="platform-nav-right">
+          <button
+            className="mobile-nav-toggle"
+            type="button"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="platform-mobile-navigation"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
           {user ? (
             <div className="user-dropdown-wrapper">
               <button

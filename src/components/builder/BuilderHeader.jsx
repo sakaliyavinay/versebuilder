@@ -144,9 +144,11 @@ export const BuilderHeader = ({
           <button
             className={`builder-toggle-preview-btn ${showPreviewPane ? "active" : ""}`}
             onClick={() => setShowPreviewPane(!showPreviewPane)}
+            aria-label={showPreviewPane ? "Switch to editor" : "Switch to live preview"}
           >
             <Eye size={15} />
-            <span>{showPreviewPane ? "Hide Preview" : "Show Preview"}</span>
+            <span className="builder-toggle-label-desktop">{showPreviewPane ? "Hide Preview" : "Show Preview"}</span>
+            <span className="builder-toggle-label-mobile">{showPreviewPane ? "Edit" : "Live Preview"}</span>
           </button>
         </div>
 

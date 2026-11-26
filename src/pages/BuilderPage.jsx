@@ -32,7 +32,9 @@ export const BuilderPage = () => {
 
   const [activeTab, setActiveTab] = useState("profile");
   const [previewDevice, setPreviewDevice] = useState("desktop");
-  const [showPreviewPane, setShowPreviewPane] = useState(true);
+  const [showPreviewPane, setShowPreviewPane] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? false : true
+  );
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export const BuilderPage = () => {
         setActiveTab={setActiveTab}
       />
 
-      <div className="builder-workspace-layout">
+      <div className={`builder-workspace-layout ${showPreviewPane ? "show-preview" : "show-editor"}`}>
         {/* Left Side: Navigation Tabs & Active Editor */}
         <div className={`builder-editor-pane ${!showPreviewPane ? "is-expanded" : ""}`}>
           <div className="builder-tabs-bar">
