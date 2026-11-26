@@ -153,6 +153,7 @@ export const SplitScreen = ({ portfolio, isPreview = false }) => {
                     <img
                       src={item.thumbnailUrl || item.url}
                       alt={item.title}
+                      data-video-poster={isVid ? "true" : undefined}
                       loading="lazy"
                     />
                     <div className="split-card-overlay">

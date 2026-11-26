@@ -36,6 +36,8 @@
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .lightbox-header,
@@ -176,8 +178,17 @@
 .video-player-frame {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  min-height: 0;
+  max-height: 78vh;
   background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.video-player-frame:has(.embedded-video) {
+  aspect-ratio: 16 / 9;
 }
 
 .native-video,
@@ -186,6 +197,45 @@
   height: 100%;
   border: none;
   display: block;
+}
+
+.adaptive-video-player.native-video,
+.adaptive-video-player.lightbox-video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  background: #000;
+}
+
+.adaptive-video-player {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  background: #000;
+}
+
+.embedded-video {
+  min-height: 0;
+}
+
+.lightbox-media-wrapper .adaptive-video-player {
+  max-width: min(95vw, 1200px);
+  max-height: 82vh;
+}
+
+.media-admin-video {
+  object-fit: contain;
+  background: #000;
+}
+
+img[data-video-poster="true"] {
+  object-fit: contain !important;
+  background: #08090b;
 }
 
 .video-modal-caption {

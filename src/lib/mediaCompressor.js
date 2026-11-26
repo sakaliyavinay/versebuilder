@@ -160,12 +160,13 @@ export const extractVideoPoster = async (file, time = 1.0) => {
           width: canvas.width,
           height: canvas.height,
           duration: video.duration,
-          aspectRatio:
-            canvas.width / canvas.height > 1.2
-              ? "landscape"
-              : canvas.width / canvas.height < 0.85
-              ? "portrait"
-              : "square",
+          aspectRatio: canvas.width / canvas.height,
+          orientation:
+            canvas.width / canvas.height < 0.9
+              ? "vertical"
+              : canvas.width / canvas.height > 1.1
+                ? "landscape"
+                : "square",
         });
       } catch (err) {
         cleanup();
@@ -227,10 +228,13 @@ export const optimizeVideo = async (file, options = { onProgress: null, maxSizeB
         size: file.size,
         sizeFormatted: formatBytes(file.size),
         posterUrl: posterData?.posterDataUrl || "",
-        width: posterData?.width || 1280,
-        height: posterData?.height || 720,
+        width: posterData?.width || null,
+        height: posterData?.height || null,
+        videoWidth: posterData?.width || null,
+        videoHeight: posterData?.height || null,
         duration: posterData?.duration || 0,
-        aspectRatio: posterData?.aspectRatio || "landscape",
+        aspectRatio: posterData?.aspectRatio || null,
+        orientation: posterData?.orientation || null,
       });
     };
 

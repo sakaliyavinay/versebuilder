@@ -172,6 +172,7 @@ export const ClassicStructured = ({ portfolio, isPreview = false }) => {
                       src={item.thumbnailUrl || item.url}
                       alt={item.title}
                       loading="lazy"
+                      data-video-poster={isVid ? "true" : undefined}
                     />
                     <span className="classic-card-tag">{item.category || (isVid ? "Video" : "Photo")}</span>
                     {isVid ? (

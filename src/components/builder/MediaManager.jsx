@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { usePortfolio } from "../../context/PortfolioContext";
 import { compressImage, optimizeVideo, formatBytes } from "../../lib/mediaCompressor";
+import { getVideoOrientation } from "../common/AdaptiveVideoPlayer";
 import { uploadToCloudinary, isCloudinaryConfigured } from "../../lib/cloudinaryService";
 
 export const MediaManager = () => {
@@ -158,7 +159,7 @@ export const MediaManager = () => {
         originalSize: result.sizeFormatted,
         compressedSize: result.sizeFormatted,
         savingsPct: 0,
-        dimensions: `${result.width} × ${result.height}`,
+        dimensions: result.width && result.height ? `${result.width} × ${result.height}` : "",
         duration: Math.round(result.duration) + "s",
         hasPoster: Boolean(result.posterUrl),
       });
@@ -202,7 +203,12 @@ export const MediaManager = () => {
         thumbnailUrl.trim() || (mediaType === "photo" ? url.trim() : ""),
       caption: caption.trim(),
       featured: featured,
-      aspectRatio: "landscape",
+      ...(mediaType === "video" && compressionMetrics?.dimensions
+        ? (() => {
+            const [width, height] = compressionMetrics.dimensions.split(" × ").map(Number);
+            return width && height ? { width, height, videoWidth: width, videoHeight: height, aspectRatio: width / height, orientation: getVideoOrientation(width, height) } : {};
+          })()
+        : {}),
     };
 
     updateActivePortfolio({
@@ -221,6 +227,15 @@ export const MediaManager = () => {
 
   const handleUpdateItem = (id, field, value) => {
     const updated = media.map((m) => (m.id === id ? { ...m, [field]: value } : m));
+    updateActivePortfolio({ media: updated });
+  };
+
+  const handleVideoMetadata = (id, metadata) => {
+    const updated = media.map((item) =>
+      item.id === id
+        ? { ...item, ...metadata }
+        : item
+    );
     updateActivePortfolio({ media: updated });
   };
 
@@ -480,11 +495,36 @@ export const MediaManager = () => {
               return (
                 <div className="media-admin-card" key={item.id || index}>
                   <div className="media-admin-thumb-box">
-                    <img
-                      src={item.thumbnailUrl || item.url}
-                      alt={item.title}
-                      className="media-admin-thumb-img"
-                    />
+                    {isVid ? (
+                      <video
+                        src={item.url}
+                        poster={item.thumbnailUrl || undefined}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="media-admin-thumb-img media-admin-video"
+                        onLoadedMetadata={(event) => {
+                          const { videoWidth: width, videoHeight: height } = event.currentTarget;
+                          if (width && height && (!item.width || !item.height)) {
+                            handleVideoMetadata(item.id, {
+                              width,
+                              height,
+                              videoWidth: width,
+                              videoHeight: height,
+                              aspectRatio: width / height,
+                              orientation: getVideoOrientation(width, height),
+                            });
+                          }
+                        }}
+                        style={item.width && item.height ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}
+                      />
+                    ) : (
+                      <img
+                        src={item.thumbnailUrl || item.url}
+                        alt={item.title}
+                        className="media-admin-thumb-img"
+                      />
+                    )}
                     <span className="media-type-badge">
                       {isVid ? <Video size={12} /> : <ImageIcon size={12} />}
                       {isVid ? "Video" : "Photo"}

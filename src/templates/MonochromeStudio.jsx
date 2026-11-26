@@ -117,7 +117,7 @@ export const MonochromeStudio = ({ portfolio, isPreview = false }) => {
                   [{(idx + 1).toString().padStart(2, "0")}]
                 </div>
                 <div className="mono-work-preview-thumb">
-                  <img src={item.thumbnailUrl || item.url} alt={item.title} className="mono-thumb-img" />
+                  <img src={item.thumbnailUrl || item.url} alt={item.title} className="mono-thumb-img" data-video-poster={isVid ? "true" : undefined} />
                   {isVid && (
                     <div className="mono-play-indicator">
                       <Play size={14} fill="#000" />

@@ -165,6 +165,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
                 src={featuredVideo.thumbnailUrl || featuredVideo.url}
                 alt={featuredVideo.title}
                 className="bento-video-img"
+                data-video-poster="true"
               />
               <div className="bento-video-hover">
                 <div className="bento-play-btn">
@@ -214,7 +215,7 @@ export const BentoGrid = ({ portfolio, isPreview = false }) => {
             onClick={() => setActiveVideo(vid)}
           >
             <div className="bento-video-cover compact">
-              <img src={vid.thumbnailUrl || vid.url} alt={vid.title} />
+              <img src={vid.thumbnailUrl || vid.url} alt={vid.title} data-video-poster="true" />
               <div className="bento-mini-play">
                 <Play size={18} fill="#fff" />
               </div>

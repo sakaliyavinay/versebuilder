@@ -137,7 +137,7 @@ export const NeoBrutalist = ({ portfolio, isPreview = false }) => {
                 }}
               >
                 <div className="neo-card-thumb">
-                  <img src={item.thumbnailUrl || item.url} alt={item.title} loading="lazy" />
+                  <img src={item.thumbnailUrl || item.url} alt={item.title} loading="lazy" data-video-poster={isVid ? "true" : undefined} />
                   <span className="neo-thumb-badge">{item.category || (isVid ? "Video" : "Photo")}</span>
                   {isVid && (
                     <div className="neo-play-button">

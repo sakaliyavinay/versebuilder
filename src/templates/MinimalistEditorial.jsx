@@ -136,6 +136,7 @@ export const MinimalistEditorial = ({ portfolio, isPreview = false }) => {
                     alt={item.title}
                     className="ed-plate-img"
                     loading="lazy"
+                    data-video-poster={isVid ? "true" : undefined}
                   />
                   {isVid && (
                     <div className="ed-plate-play">

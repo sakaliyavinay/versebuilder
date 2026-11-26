@@ -234,6 +234,7 @@ export const DarkFuturistic = ({ portfolio, isPreview = false }) => {
                     src={item.thumbnailUrl || item.url}
                     alt={item.title}
                     loading="lazy"
+                    data-video-poster={isVid ? "true" : undefined}
                   />
                   <div className="df-card-hover-mask">
                     <span className="df-card-badge">{item.category || (isVid ? "Video" : "Photo")}</span>

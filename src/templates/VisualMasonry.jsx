@@ -196,6 +196,7 @@ export const VisualMasonry = ({ portfolio, isPreview = false }) => {
                       alt={item.title}
                       className="brick-image"
                       loading="lazy"
+                      data-video-poster={isVid ? "true" : undefined}
                     />
                     <div className="brick-overlay">
                       <div className="brick-top-info">

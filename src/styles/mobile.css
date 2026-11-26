@@ -866,11 +866,13 @@ span {
   }
 
   .lightbox-image,
+  .lightbox-video,
+  .adaptive-video-player,
   .video-modal-container video,
   .video-modal-container iframe {
     width: 100%;
     max-width: 100%;
-    max-height: calc(100dvh - 180px);
+    max-height: min(80dvh, calc(100dvh - 180px));
     object-fit: contain;
   }
 }

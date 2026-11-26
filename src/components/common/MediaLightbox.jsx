@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, Download, ExternalLink } from "lucide-react";
+import { AdaptiveVideoPlayer } from "./AdaptiveVideoPlayer";
 
 export const MediaLightbox = ({ items = [], activeIndex = 0, onClose, onNavigate }) => {
   const currentItem = items[activeIndex];
@@ -55,11 +56,15 @@ export const MediaLightbox = ({ items = [], activeIndex = 0, onClose, onNavigate
           )}
 
           <div className="lightbox-media-wrapper">
-            <img
-              src={currentItem.url || currentItem.thumbnailUrl}
-              alt={currentItem.title}
-              className="lightbox-image"
-            />
+            {currentItem.type === "video" ? (
+              <AdaptiveVideoPlayer video={currentItem} className="lightbox-video" />
+            ) : (
+              <img
+                src={currentItem.url || currentItem.thumbnailUrl}
+                alt={currentItem.title}
+                className="lightbox-image"
+              />
+            )}
           </div>
 
           {activeIndex < items.length - 1 && (

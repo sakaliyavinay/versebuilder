@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { X, Play, ExternalLink } from "lucide-react";
+import { X } from "lucide-react";
+import { AdaptiveVideoPlayer } from "./AdaptiveVideoPlayer";
 
 export const VideoModal = ({ video, onClose }) => {
   useEffect(() => {
@@ -54,16 +55,7 @@ export const VideoModal = ({ video, onClose }) => {
               className="embedded-video"
             />
           ) : (
-            <video
-              src={video.url}
-              poster={video.thumbnailUrl}
-              controls
-              autoPlay
-              playsInline
-              className="native-video"
-            >
-              Your browser does not support the video tag.
-            </video>
+            <AdaptiveVideoPlayer video={video} autoPlay className="native-video" />
           )}
         </div>
 
